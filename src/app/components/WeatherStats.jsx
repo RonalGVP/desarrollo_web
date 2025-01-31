@@ -16,7 +16,7 @@ import SnowChart from './charts/SnowChart';
 // 🔹 Importa y registra las escalas y elementos necesarios de Chart.js
 import {
   Chart as ChartJS,
-  CategoryScale, // <- 🔹 Esto evita el error
+  CategoryScale, 
   LinearScale,
   PointElement,
   LineElement,

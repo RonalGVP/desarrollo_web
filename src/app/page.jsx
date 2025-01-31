@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from "./components/ui/card";
 import { Cloud, Mountain } from 'lucide-react';
+import "../app/globals.css";
 
 const url_clima = '/datos_clima';
 const url_geology = '/datos_geologia';
