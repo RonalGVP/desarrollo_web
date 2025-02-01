@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
-import Select from './ui/select';
-import Spinner from './ui/spinner';
+import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
+import { CalendarDays, Sunrise, CloudRain, Wind, Thermometer, BarChart2, Droplets } from 'lucide-react';
 import { fetchWeatherData } from '../services/WeatherServices';
 import { filterDataByDateRange } from '../utils/dataUtils';
 import HumidityChart from './charts/HumidityChart';
@@ -13,10 +12,9 @@ import SoilChart from './charts/SoilChart';
 import SolarChart from './charts/SolarChart';
 import SnowChart from './charts/SnowChart';
 
-// 🔹 Importa y registra las escalas y elementos necesarios de Chart.js
 import {
   Chart as ChartJS,
-  CategoryScale, // <- 🔹 Esto evita el error
+  CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
@@ -28,9 +26,8 @@ import {
   Legend,
 } from 'chart.js';
 
-// 🔹 Registra las escalas y elementos
 ChartJS.register(
-  CategoryScale, // <- 🔹 Registra CategoryScale
+  CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
@@ -41,6 +38,26 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+const CategorySelect = ({ value, onChange, categories }) => {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      {categories.map((category) => (
+        <button
+          key={category.value}
+          onClick={() => onChange(category.value)}
+          className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 
+            ${value === category.value 
+              ? 'bg-sky-600 text-white shadow-lg' 
+              : 'bg-white/80 hover:bg-sky-50 text-sky-900 shadow-sm hover:shadow-md'}`}
+        >
+          {category.icon}
+          <span className="font-medium">{category.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+};
 
 function WeatherStats() {
   const [weatherData, setWeatherData] = useState(null);
@@ -53,13 +70,31 @@ function WeatherStats() {
   });
 
   const categories = [
-    { value: 'humidity', label: 'Humedad y Precipitación' },
-    { value: 'evapotranspiration', label: 'Evapotranspiración' },
-    { value: 'wind', label: 'Viento' },
-    { value: 'pressure', label: 'Presión y Flujo de Calor' },
-    { value: 'soil', label: 'Suelo' },
-    { value: 'solar', label: 'Luz Solar y UV' },
-    { value: 'snow', label: 'Nieve' },
+    { 
+      value: 'humidity', 
+      label: 'Humedad', 
+      icon: <Droplets className="h-5 w-5" /> 
+    },
+    { 
+      value: 'wind', 
+      label: 'Viento', 
+      icon: <Wind className="h-5 w-5" /> 
+    },
+    { 
+      value: 'evapotranspiration', 
+      label: 'Evaporación', 
+      icon: <CloudRain className="h-5 w-5" /> 
+    },
+    { 
+      value: 'pressure', 
+      label: 'Presión', 
+      icon: <BarChart2 className="h-5 w-5" /> 
+    },
+    { 
+      value: 'soil', 
+      label: 'Suelo', 
+      icon: <Thermometer className="h-5 w-5" /> 
+    },
   ];
 
   const handleDateChange = (type, value) => {
@@ -113,58 +148,105 @@ function WeatherStats() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Spinner size="h-16 w-16" color="border-blue-500" />
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-sky-100 via-blue-50 to-cyan-50">
+        <div className="p-8 rounded-xl bg-white/80 backdrop-blur-sm shadow-lg">
+          <div className="animate-spin h-12 w-12 border-4 border-sky-500 border-t-transparent rounded-full" />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="bg-red-50 text-red-500 p-4 rounded-lg">
-          <h3 className="font-bold mb-2">Error</h3>
-          <p>{error}</p>
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-sky-100 via-blue-50 to-cyan-50">
+        <div className="bg-red-50/90 backdrop-blur-sm text-red-500 p-6 rounded-xl shadow-lg max-w-md">
+          <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+            <AlertCircle className="h-5 w-5" />
+            Error
+          </h3>
+          <p className="text-red-600">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 via-blue-50 to-cyan-50 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        <Card className="shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600">
-            <CardTitle className="text-2xl font-bold text-white">Estadísticas del Clima</CardTitle>
+        <Card className="shadow-xl rounded-xl overflow-hidden backdrop-blur-sm bg-white/90">
+          <CardHeader className="bg-gradient-to-r from-sky-600 to-blue-700 p-6">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
+                <Sunrise className="h-6 w-6" />
+                Estadísticas Meteorológicas
+              </CardTitle>
+            </div>
           </CardHeader>
-          <CardContent className="p-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
-                <Select options={categories} value={selectedCategory} onChange={setSelectedCategory} />
-              </div>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Inicial</label>
-                  <input
-                    type="date"
-                    value={dateRange.start.toISOString().split('T')[0]}
-                    onChange={(e) => handleDateChange('start', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                  />
+          
+          <CardContent className="p-6 space-y-8">
+            {/* Category Selector */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-sky-900">
+                Seleccionar Categoría
+              </h3>
+              <CategorySelect 
+                value={selectedCategory} 
+                onChange={setSelectedCategory}
+                categories={categories}
+              />
+            </div>
+
+            {/* Date Range Selector */}
+            <div className="space-y-4 bg-gradient-to-r from-sky-50 to-blue-50 p-6 rounded-xl shadow-inner">
+              <h3 className="text-lg font-semibold text-sky-900 flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-sky-700" />
+                Rango de Fechas
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="relative group">
+                  <label className="block text-sm font-medium text-sky-800 mb-2">
+                    Fecha Inicial
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={dateRange.start.toISOString().split('T')[0]}
+                      onChange={(e) => handleDateChange('start', e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg border-2 border-sky-200 
+                               bg-white/80 backdrop-blur-sm
+                               focus:ring-2 focus:ring-sky-400 focus:border-sky-400
+                               transition-all duration-200
+                               text-sky-900 placeholder-sky-400
+                               shadow-sm hover:shadow-md"
+                    />
+                    <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-sky-400/10 to-blue-400/10 pointer-events-none" />
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Final</label>
-                  <input
-                    type="date"
-                    value={dateRange.end.toISOString().split('T')[0]}
-                    onChange={(e) => handleDateChange('end', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                  />
+                
+                <div className="relative group">
+                  <label className="block text-sm font-medium text-sky-800 mb-2">
+                    Fecha Final
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={dateRange.end.toISOString().split('T')[0]}
+                      onChange={(e) => handleDateChange('end', e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg border-2 border-sky-200 
+                               bg-white/80 backdrop-blur-sm
+                               focus:ring-2 focus:ring-sky-400 focus:border-sky-400
+                               transition-all duration-200
+                               text-sky-900 placeholder-sky-400
+                               shadow-sm hover:shadow-md"
+                    />
+                    <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-sky-400/10 to-blue-400/10 pointer-events-none" />
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-inner">
+
+            {/* Graph Container */}
+            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-inner min-h-[400px]">
               {renderGraph()}
             </div>
           </CardContent>
