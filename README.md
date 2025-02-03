@@ -11,7 +11,7 @@ npm install
 # or 
 npm i
 
-# run server 
+# run server
 npm run dev
 # or
 yarn dev

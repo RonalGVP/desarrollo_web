@@ -12,32 +12,7 @@ import SoilChart from './charts/SoilChart';
 import SolarChart from './charts/SolarChart';
 import SnowChart from './charts/SnowChart';
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  RadarController,
-  RadialLinearScale,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  RadarController,
-  RadialLinearScale,
-  Title,
-  Tooltip,
-  Legend
-);
 
 const CategorySelect = ({ value, onChange, categories }) => {
   return (
