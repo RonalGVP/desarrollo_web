@@ -1,6 +1,31 @@
 import { Bar, Line } from 'react-chartjs-2';
 import { CloudRain, Droplets } from 'lucide-react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  RadarController,
+  RadialLinearScale,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  RadarController,
+  RadialLinearScale,
+  Title,
+  Tooltip,
+  Legend
+);
 export default function HumidityChart({ filteredData }) {
   const chartOptions = {
     responsive: true,

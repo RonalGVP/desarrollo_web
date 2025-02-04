@@ -1,9 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
-import { CalendarDays, Sunrise, CloudRain, Wind, Thermometer, BarChart2, Droplets } from 'lucide-react';
-import { fetchWeatherData } from '../services/WeatherServices';
+import { CalendarDays, Sunrise } from 'lucide-react';
+import { fetchWeatherData } from '../services/WeatherServices';  
 import { filterDataByDateRange } from '../utils/dataUtils';
+import CategorySelector from '../components/CategorySelector';
 import HumidityChart from './charts/HumidityChart';
 import WindChart from './charts/WindChart';
 import EvapotranspirationChart from './charts/EvapotranspirationChart';
@@ -11,53 +12,17 @@ import PressureChart from './charts/PressureChart';
 import SoilChart from './charts/SoilChart';
 import SolarChart from './charts/SolarChart';
 import SnowChart from './charts/SnowChart';
+import DateRangePicker from '../components/DateRangePicker';
+import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorMessage from '../components/ErrorMessage';
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  RadarController,
-  RadialLinearScale,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  RadarController,
-  RadialLinearScale,
-  Title,
-  Tooltip,
-  Legend
-);
-
-const CategorySelect = ({ value, onChange, categories }) => {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-      {categories.map((category) => (
-        <button
-          key={category.value}
-          onClick={() => onChange(category.value)}
-          className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 
-            ${value === category.value 
-              ? 'bg-sky-600 text-white shadow-lg' 
-              : 'bg-white/80 hover:bg-sky-50 text-sky-900 shadow-sm hover:shadow-md'}`}
-        >
-          {category.icon}
-          <span className="font-medium">{category.label}</span>
-        </button>
-      ))}
-    </div>
-  );
-};
+const categories = [
+  { value: 'humidity', label: 'Humedad' },
+  { value: 'wind', label: 'Viento' },
+  { value: 'evapotranspiration', label: 'Evaporación' },
+  { value: 'pressure', label: 'Presión' },
+  { value: 'soil', label: 'Suelo' },
+];
 
 function WeatherStats() {
   const [weatherData, setWeatherData] = useState(null);
@@ -68,41 +33,6 @@ function WeatherStats() {
     start: new Date('2025-01-28'),
     end: new Date('2025-02-02'),
   });
-
-  const categories = [
-    { 
-      value: 'humidity', 
-      label: 'Humedad', 
-      icon: <Droplets className="h-5 w-5" /> 
-    },
-    { 
-      value: 'wind', 
-      label: 'Viento', 
-      icon: <Wind className="h-5 w-5" /> 
-    },
-    { 
-      value: 'evapotranspiration', 
-      label: 'Evaporación', 
-      icon: <CloudRain className="h-5 w-5" /> 
-    },
-    { 
-      value: 'pressure', 
-      label: 'Presión', 
-      icon: <BarChart2 className="h-5 w-5" /> 
-    },
-    { 
-      value: 'soil', 
-      label: 'Suelo', 
-      icon: <Thermometer className="h-5 w-5" /> 
-    },
-  ];
-
-  const handleDateChange = (type, value) => {
-    setDateRange((prev) => ({
-      ...prev,
-      [type]: new Date(value),
-    }));
-  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -147,27 +77,11 @@ function WeatherStats() {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-sky-100 via-blue-50 to-cyan-50">
-        <div className="p-8 rounded-xl bg-white/80 backdrop-blur-sm shadow-lg">
-          <div className="animate-spin h-12 w-12 border-4 border-sky-500 border-t-transparent rounded-full" />
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-sky-100 via-blue-50 to-cyan-50">
-        <div className="bg-red-50/90 backdrop-blur-sm text-red-500 p-6 rounded-xl shadow-lg max-w-md">
-          <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
-            <AlertCircle className="h-5 w-5" />
-            Error
-          </h3>
-          <p className="text-red-600">{error}</p>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={error} />;
   }
 
   return (
@@ -189,10 +103,9 @@ function WeatherStats() {
               <h3 className="text-lg font-semibold text-sky-900">
                 Seleccionar Categoría
               </h3>
-              <CategorySelect 
+              <CategorySelector 
                 value={selectedCategory} 
-                onChange={setSelectedCategory}
-                categories={categories}
+                onChange={setSelectedCategory} 
               />
             </div>
 
@@ -202,47 +115,7 @@ function WeatherStats() {
                 <CalendarDays className="h-5 w-5 text-sky-700" />
                 Rango de Fechas
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="relative group">
-                  <label className="block text-sm font-medium text-sky-800 mb-2">
-                    Fecha Inicial
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      value={dateRange.start.toISOString().split('T')[0]}
-                      onChange={(e) => handleDateChange('start', e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border-2 border-sky-200 
-                               bg-white/80 backdrop-blur-sm
-                               focus:ring-2 focus:ring-sky-400 focus:border-sky-400
-                               transition-all duration-200
-                               text-sky-900 placeholder-sky-400
-                               shadow-sm hover:shadow-md"
-                    />
-                    <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-sky-400/10 to-blue-400/10 pointer-events-none" />
-                  </div>
-                </div>
-                
-                <div className="relative group">
-                  <label className="block text-sm font-medium text-sky-800 mb-2">
-                    Fecha Final
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      value={dateRange.end.toISOString().split('T')[0]}
-                      onChange={(e) => handleDateChange('end', e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border-2 border-sky-200 
-                               bg-white/80 backdrop-blur-sm
-                               focus:ring-2 focus:ring-sky-400 focus:border-sky-400
-                               transition-all duration-200
-                               text-sky-900 placeholder-sky-400
-                               shadow-sm hover:shadow-md"
-                    />
-                    <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-sky-400/10 to-blue-400/10 pointer-events-none" />
-                  </div>
-                </div>
-              </div>
+              <DateRangePicker dateRange={dateRange} setDateRange={setDateRange} />
             </div>
 
             {/* Graph Container */}
