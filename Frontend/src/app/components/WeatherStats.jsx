@@ -1,8 +1,8 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 import { CalendarDays, Sunrise } from 'lucide-react';
-import { fetchWeatherData } from '../services/WeatherServices';  
+
 import { filterDataByDateRange } from '../utils/dataUtils';
 import CategorySelector from '../components/CategorySelector';
 import HumidityChart from './charts/HumidityChart';
@@ -15,42 +15,18 @@ import SnowChart from './charts/SnowChart';
 import DateRangePicker from '../components/DateRangePicker';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
+import { useWeatherData } from '../hooks/useWeatherData';
 
-const categories = [
-  { value: 'humidity', label: 'Humedad' },
-  { value: 'wind', label: 'Viento' },
-  { value: 'evapotranspiration', label: 'Evaporación' },
-  { value: 'pressure', label: 'Presión' },
-  { value: 'soil', label: 'Suelo' },
-];
 
 function WeatherStats() {
-  const [weatherData, setWeatherData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('humidity');
   const [dateRange, setDateRange] = useState({
     start: new Date('2025-01-28'),
     end: new Date('2025-02-02'),
   });
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchWeatherData();
-        setWeatherData(data);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching weather data:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    loadData();
-  }, []);
+  const { weatherData, loading, error } = useWeatherData()
 
   const renderGraph = () => {
     if (!weatherData) return null;
@@ -96,16 +72,16 @@ function WeatherStats() {
               </CardTitle>
             </div>
           </CardHeader>
-          
+
           <CardContent className="p-6 space-y-8">
             {/* Category Selector */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-sky-900">
                 Seleccionar Categoría
               </h3>
-              <CategorySelector 
-                value={selectedCategory} 
-                onChange={setSelectedCategory} 
+              <CategorySelector
+                value={selectedCategory}
+                onChange={setSelectedCategory}
               />
             </div>
 

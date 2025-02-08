@@ -1,3 +1,4 @@
+'use client'
 import { Radar } from 'react-chartjs-2';
 import { Wind } from 'lucide-react';
 

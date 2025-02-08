@@ -1,3 +1,4 @@
+'use client'
 import { Bar, Line } from 'react-chartjs-2';
 import { CloudRain, Droplets } from 'lucide-react';
 import {

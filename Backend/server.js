@@ -1,42 +1,22 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const db = require('./config/database');
+import express from 'express';
+import cors from 'cors';
+import { createUserTable } from './models/user.js';
+import authRoutes from './routes/authroutes.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+// Habilitar CORS
 app.use(cors());
 
-// Ruta de prueba
-app.get('/', (req, res) => {
-    res.send(`Servidor corriendo en el puerto ${PORT}`);
-});
+// Middleware para procesar JSON
+app.use(express.json());
 
-// Obtener todos los usuarios
-app.get('/usuarios', (req, res) => {
-    db.all('SELECT * FROM usuarios', [], (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.json(rows);
-    });
-});
+// Rutas
+app.use('/api/auth', authRoutes);
 
-// Agregar un usuario
-app.post('/usuarios', (req, res) => {
-    const { nombre, email } = req.body;
-    db.run('INSERT INTO usuarios (nombre, email) VALUES (?, ?)', [nombre, email], function (err) {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.json({ id: this.lastID, nombre, email });
-    });
-});
-
-app.listen(PORT, () => {
-    console.log(`Servidor en http://localhost:${PORT}`);
+// Iniciar servidor
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, async () => {
+  await createUserTable();
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
