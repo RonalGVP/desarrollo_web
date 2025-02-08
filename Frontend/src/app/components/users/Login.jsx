@@ -5,17 +5,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
+import { login } from "../../services/UserServices";
+import { useAuth } from "../../hooks/AuthUser"; 
 
-const Login = ({ onLogin }) => {
-  const [username, setUsername] = useState('');
+const Login = () => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { login: authLogin } = useAuth(); // Usa la función login del contexto
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await login({ username, password });
-      onLogin(response.data.token);
+      const response = await login({ email, password });
+      authLogin(response.data.token); // Usa la función login del contexto
     } catch (error) {
       setError('Error al iniciar sesión. Por favor, verifica tus credenciales.');
       console.error('Login failed:', error);
@@ -45,10 +48,10 @@ const Login = ({ onLogin }) => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Input
-                type="text"
-                placeholder="Nombre de usuario"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                placeholder="Correo electrónico"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full"
               />
             </div>

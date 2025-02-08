@@ -1,18 +1,26 @@
-'use client'
+"use client";
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../app/hooks/AuthUser'; // Importa el contexto de autenticación
 import { Card, CardContent } from "./components/ui/card";
 import { Cloud, Mountain } from 'lucide-react';
 
 const ScienceDashboard = () => {
   const router = useRouter();
+  const { user } = useAuth();  // Accede al usuario del contexto
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
+  useEffect(() => {
+    if (!user) {
+      router.push("/login"); // Si no hay usuario, redirige al login
+    }
+  }, [user, router]);
+
+  if (!mounted || !user) return null; // Evita el renderizado antes de la redirección
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-8">

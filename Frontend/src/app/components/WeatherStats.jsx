@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 import { CalendarDays, Sunrise } from 'lucide-react';
-
 import { filterDataByDateRange } from '../utils/dataUtils';
 import CategorySelector from '../components/CategorySelector';
 import HumidityChart from './charts/HumidityChart';

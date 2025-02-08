@@ -1,6 +1,5 @@
 'use client'
 import { Line } from 'react-chartjs-2';
-import { getChartOptions } from '../../utils/chartUtils';
 
 export default function PressureChart({ filteredData }) {
   return (
@@ -25,7 +24,7 @@ export default function PressureChart({ filteredData }) {
           },
         ],
       }}
-      options={getChartOptions('Presión y Temperatura')}
+     
     />
   );
 }

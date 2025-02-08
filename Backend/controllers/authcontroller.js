@@ -1,5 +1,6 @@
 import db from '../config/database.js';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 // Obtener todos los usuarios
 export const getUsers = (req, res) => {
@@ -73,4 +74,37 @@ export const deleteUser = (req, res) => {
         if (this.changes === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
         res.json({ message: 'Usuario eliminado correctamente' });
     });
+};
+
+// Función de login
+export const login = async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ error: 'El email y la contraseña son requeridos' });
+    }
+
+    // Buscar usuario por email
+    db.get('SELECT * FROM usuarios WHERE email = ?', [email], async (err, user) => {
+        if (err) return res.status(500).json({ error: 'Error al verificar el usuario' });
+        if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+        // Comparar la contraseña ingresada con la almacenada
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(401).json({ error: 'Contraseña incorrecta' });
+
+        // Crear un token JWT
+        const token = jwt.sign({ id: user.id, username: user.username, email: user.email }, process.env.JWT_SECRET, {
+            expiresIn: '1h',  // El token expira en 1 hora
+        });
+
+        res.json({ message: 'Login exitoso', token });
+    });
+};
+
+// Función de logout
+export const logout = (req, res) => {
+    // Al usar JWT, no necesitamos hacer nada en el backend para el logout,
+    // solo eliminamos el token en el frontend.
+    res.json({ message: 'Logout exitoso' });
 };
