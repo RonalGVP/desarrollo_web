@@ -1,7 +1,7 @@
 'use client'
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import Register from '../components/users/Register'; // Asumimos que Register está en la misma carpeta
+import Register from '../../components/users/Register'; // Asumimos que Register está en la misma carpeta
 
 const CreateUserPage = () => {
   const router = useRouter();

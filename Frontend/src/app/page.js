@@ -1,28 +1,14 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '../app/hooks/AuthUser'; // Importa el contexto de autenticación
 import { Card, CardContent } from "./components/ui/card";
 import { Cloud, Mountain } from 'lucide-react';
-
+import AuthRedirect from './components/users/AuthRedirect';
+import { useRouter } from 'next/navigation';
 const ScienceDashboard = () => {
   const router = useRouter();
-  const { user } = useAuth();  // Accede al usuario del contexto
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!user) {
-      router.push("/login"); // Si no hay usuario, redirige al login
-    }
-  }, [user, router]);
-
-  if (!mounted || !user) return null; // Evita el renderizado antes de la redirección
 
   return (
+    <AuthRedirect>
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -39,7 +25,7 @@ const ScienceDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Climate Card */}
           <div 
-            onClick={() => router.push('/clima')} 
+            onClick={() => router.push('/pages/clima')} 
             className="cursor-pointer transform hover:scale-105 transition-all duration-300"
           >
             <Card className="group hover:shadow-xl transition-all duration-300 bg-white/50 backdrop-blur-sm hover:bg-white/70 border-2 border-transparent hover:border-blue-200">
@@ -85,6 +71,7 @@ const ScienceDashboard = () => {
         </div>
       </div>
     </div>
+    </AuthRedirect>
   );
 };
 

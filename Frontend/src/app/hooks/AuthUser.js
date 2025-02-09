@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
-    router.push("/login"); // Redirige al login tras cerrar sesión
+    router.push("/pages/login"); // Redirige al login tras cerrar sesión
   };
 
   return (

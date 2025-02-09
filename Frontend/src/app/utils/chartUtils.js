@@ -10,8 +10,9 @@ import {
   Title,
   Tooltip,
   Legend,
+  ScatterController,  // Importación del ScatterElement
 } from 'chart.js';
-import { Bar, Line, Radar } from 'react-chartjs-2';
+import { Bar, Line, Radar, Scatter } from 'react-chartjs-2';  // Importar Scatter desde react-chartjs-2
 import { CloudRain, Droplets } from 'lucide-react';
 
 ChartJS.register(
@@ -24,7 +25,8 @@ ChartJS.register(
   RadialLinearScale,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ScatterController  // Registrar el ScatterElement
 );
 
 export const getChartOptions = (title) => ({
@@ -40,4 +42,4 @@ export const getChartOptions = (title) => ({
   },
 });
 
-export { Bar, Line, Radar, CloudRain, Droplets }; // Exporta los gráficos y los íconos
+export { Bar, Line, Radar, Scatter, CloudRain, Droplets };  // Exportar Scatter además de los otros componentes
