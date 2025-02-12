@@ -1,23 +1,25 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '../../hooks/AuthUser';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../hooks/AuthUser";
 
 const AuthRedirect = ({ children }) => {
-  const { user } = useAuth();  // Obtiene el usuario del contexto de autenticación
+  const { user, loading } = useAuth(); // Ahora también obtenemos "loading"
   const router = useRouter();
-  const [mounted, setMounted] = useState(false); // Evita el renderizado antes de que React se haya montado
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      router.push("/pages/login");  // Asegúrate de que esta sea la ruta correcta al login
-    } else {
-      setMounted(true);  // Si hay usuario, permite el renderizado
+    if (!loading) { // Solo ejecutar si ya terminó de cargar
+      if (!user) {
+        router.push("/pag/login");
+      } else {
+        setMounted(true);
+      }
     }
-  }, [user, router]);
+  }, [user, router, loading]);
 
-  if (!mounted || !user) return null;  // Evita el renderizado hasta que se confirme el estado de autenticación
+  if (loading || !mounted) return null; // Espera hasta que todo esté listo
 
-  return <>{children}</>;  // Si el usuario está autenticado, renderiza los hijos (la vista protegida)
+  return <>{children}</>;
 };
 
 export default AuthRedirect;

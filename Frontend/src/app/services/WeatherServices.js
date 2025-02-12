@@ -1,7 +1,8 @@
 export const fetchWeatherData = async () => {
+
     try {
       const response = await fetch(
-        'https://my.meteoblue.com/packages/basic-1h_agro-1h?lat=47.56&lon=7.57&apikey=oGahnEkIrMS9HU8K'
+        "https://my.meteoblue.com/packages/basic-1h_agro-1h?lat=47.56&lon=7.57&apikey=d7Vo1slLyqZGtN6Y"
       );
   
       if (!response.ok) {
@@ -15,3 +16,4 @@ export const fetchWeatherData = async () => {
       throw err;
     }
   };
+

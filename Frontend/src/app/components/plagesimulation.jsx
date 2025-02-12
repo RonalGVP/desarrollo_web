@@ -1,44 +1,44 @@
-import { useState, useEffect } from "react";
+'use client';
+
+import { useState } from "react";
 import LineChartPlague from "./chartsPlague/LineChart";
 import ScatterChartPlague from "./chartsPlague/ScatterChart";
 import HeatmapChartPlague from "./chartsPlague/HeatmapChart";
 import { getChartOptions } from "../utils/chartUtils";
-import { filterDataByDateRange } from "../utils/dataUtils"; // Asegúrate de importar la función
+import { filterDataByDateRange } from "../utils/dataUtils";
 import { useWeatherData } from "../hooks/useWeatherData";
-import DateRangePicker from "./DateRangePicker"; // Asegúrate de tener un componente de selección de rango de fechas
-import SelectChart from "./SelectCharPlague"; // Aquí importamos el nuevo componente SelectChart
+import DateRangePicker from "./DateRangePicker";
+import SelectChart from "./SelectCharPlague";
+import Navbar from "./Navbar";
 
 export default function PlagueSimulation() {
   const [selectedChart, setSelectedChart] = useState("line");
-  const [filteredData, setFilteredData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [dateRange, setDateRange] = useState({
     start: new Date("2025-01-09"),
     end: new Date("2025-02-19"),
   });
 
-  // Suponiendo que useWeatherData obtiene los datos meteorológicos
-  const { weatherData } = useWeatherData(); // O ajusta según tu forma de obtener datos
+  const { weatherData, loading, error } = useWeatherData();
+  const filteredData = weatherData ? filterDataByDateRange(weatherData, dateRange) : null;
 
-  useEffect(() => {
-    if (weatherData) {
-      // Filtrar los datos usando la función filterDataByDateRange
-      const data = filterDataByDateRange(weatherData, dateRange);
-      setFilteredData(data);
-      setLoading(false);
-    }
-  }, [weatherData, dateRange]); // Ahora depende del dateRange también
+  if (loading) return (
+    <>
+      <Navbar />
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+      </div>
+    </>
+  );
 
-  const handleDateRangeChange = (newDateRange) => {
-    setDateRange(newDateRange);
-    setLoading(true); // Vuelve a cargar los datos cuando el rango cambie
-  };
+  if (error) return (
+    <>
+      <Navbar />
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <p className="text-red-600">Error al obtener datos: {error}</p>
+      </div>
+    </>
+  );
 
-  if (loading) return <p>Cargando datos...</p>;
-  if (error) return <p>Error al obtener datos: {error}</p>;
-
-  // Los componentes de gráfico
   const chartComponents = {
     line: LineChartPlague,
     scatter: ScatterChartPlague,
@@ -48,29 +48,42 @@ export default function PlagueSimulation() {
   const ChartComponent = chartComponents[selectedChart];
 
   return (
-    <div>
-      <h2>Simulación de Plagas</h2>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
+            Simulación de Plagas
+          </h2>
 
-      {/* Selector de fecha */}
-      <div>
-        <h3>Seleccionar Rango de Fechas</h3>
-        <DateRangePicker dateRange={dateRange} setDateRange={setDateRange} />
-      </div>
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <DateRangePicker dateRange={dateRange} setDateRange={setDateRange} />
+            <SelectChart onChange={setSelectedChart} />
+          </div>
 
-      {/* Usamos el componente SelectChart */}
-      <div>
-        <h3>Seleccionar Tipo de Gráfico</h3>
-        <SelectChart onChange={setSelectedChart} />
-      </div>
-
-      {/* Renderizado del gráfico */}
-      <div>
-        {filteredData ? (
-          <ChartComponent filteredData={filteredData} options={getChartOptions("Simulación de Plagas")} />
-        ) : (
-          <p>No hay datos filtrados disponibles.</p>
-        )}
-      </div>
+          {/* Contenedor centrado para los gráficos */}
+          <div className="flex justify-center items-center">
+            <div className="w-full max-w-4xl bg-white rounded-lg p-4 shadow-inner">
+              {filteredData ? (
+                <div className="aspect-video">
+                  <ChartComponent 
+                    filteredData={filteredData} 
+                    options={getChartOptions("Simulación de Plagas")} 
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-64">
+                  <p className="text-gray-500">
+                    No hay datos filtrados disponibles.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
+

@@ -5,9 +5,7 @@ import {
   LineChart,
   ScatterChart,
   Grid2X2,
-  BarChart4,
-  PieChart,
-  ActivitySquare
+
 } from "lucide-react";
 
 const chartTypes = [
