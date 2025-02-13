@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { useState } from 'react';
 import { Cloud, Sun, ThermometerSun, LogIn } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
@@ -6,19 +6,22 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
 import { login } from "../../services/UserServices";
-import { useAuth } from "../../hooks/AuthUser"; 
+import { useAuth } from "../../hooks/AuthUser";
+import { useRouter } from 'next/navigation'; // Importa useRouter de next/navigation
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login: authLogin } = useAuth(); // Usa la función login del contexto
+  const router = useRouter(); // Inicializa el router
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await login({ email, password });
       authLogin(response.data.token); // Usa la función login del contexto
+      router.push('/'); // Redirige a la ruta /page/register después de iniciar sesión
     } catch (error) {
       setError('Error al iniciar sesión. Por favor, verifica tus credenciales.');
       console.error('Login failed:', error);
@@ -74,12 +77,12 @@ const Login = () => {
           </form>
           <div className="mt-4 text-center text-sm text-gray-500">
             ¿No tienes una cuenta?{' '}
-            <a
-              href="/register"
-              className="text-blue-500 hover:underline"
+            <span
+              onClick={() => router.push('/pag/register')} // Usamos el método push para redirigir
+              className="text-blue-500 hover:underline cursor-pointer"
             >
               Regístrate aquí
-            </a>
+            </span>
           </div>
           <div className="mt-2 text-center text-xs text-gray-400">
             Accede a datos meteorológicos en tiempo real

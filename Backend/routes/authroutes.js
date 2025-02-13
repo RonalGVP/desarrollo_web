@@ -1,5 +1,5 @@
 import express from 'express';
-import { getUsers, getUserById, createUser, updateUser, deleteUser, login, logout } from '../controllers/authcontroller.js';
+import { getUsers, getUserById, createUser, updateUser, deleteUser, login } from '../controllers/authcontroller.js';
 
 const router = express.Router();
 
@@ -12,6 +12,5 @@ router.delete('/users/:id', deleteUser); // Eliminar usuario
 
 // Rutas de autenticación
 router.post('/login', login);         // Login de usuario
-router.post('/logout', logout);       // Logout de usuario
 
 export default router;

@@ -1,22 +1,18 @@
 'use client';
 import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/AuthUser";
-import { updateUser, getUserById } from "../../services/UserServices";
+import { getUserById,getUsers} from "../../services/UserServices";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "../ui/card";
 import { Button } from "../ui/button";
-import { Edit } from "lucide-react";
+import { AlertCircle, User, Mail, Cloud } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
-import { Input } from "../ui/input";
 import { useRouter } from 'next/navigation';  // Importa el hook useRouter
 
-const EditProfile = () => {
+const Profile = () => {
   const { user } = useAuth();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [newUsername, setNewUsername] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
   const router = useRouter();  // Inicializa el hook useRouter
 
   useEffect(() => {
@@ -31,8 +27,6 @@ const EditProfile = () => {
       .then((response) => {
         if (response.data) {
           setUserData(response.data);
-          setNewUsername(response.data.username);
-          setNewEmail(response.data.email);
         } else {
           setError("No se encontraron datos del usuario.");
         }
@@ -44,19 +38,8 @@ const EditProfile = () => {
       });
   }, [user]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const updatedUser = { username: newUsername, email: newEmail };
-      const response = await updateUser(user.id, updatedUser);
-      setUserData(response.data);
-      setError(null);  // Clear any previous error
-      setSuccessMessage("Perfil actualizado correctamente!");  // Display success message
-      // Redirige a la página del perfil después de la actualización
-      router.push('/pag/perfil');  // Redirección
-    } catch (error) {
-      setError("Hubo un error al actualizar el perfil.");
-    }
+  const handleEditClick = () => {
+    router.push('/pag/edit');  // Redirige a la página de edición
   };
 
   if (loading) {
@@ -69,7 +52,8 @@ const EditProfile = () => {
 
   if (error) {
     return (
-      <Alert className="max-w-2xl mx-auto mt-4">
+      <Alert variant="destructive" className="max-w-2xl mx-auto mt-4 bg-sky-50 border-sky-200 text-sky-800">
+        <AlertCircle className="h-4 w-4" />
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
@@ -77,7 +61,8 @@ const EditProfile = () => {
 
   if (!userData || !userData.username) {
     return (
-      <Alert className="max-w-2xl mx-auto mt-4">
+      <Alert variant="destructive" className="max-w-2xl mx-auto mt-4 bg-sky-50 border-sky-200 text-sky-800">
+        <AlertCircle className="h-4 w-4" />
         <AlertDescription>Error: Datos inválidos.</AlertDescription>
       </Alert>
     );
@@ -89,54 +74,46 @@ const EditProfile = () => {
         <CardHeader className="space-y-1 bg-sky-400 text-white rounded-t-lg p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Edit className="h-6 w-6" />
-              <CardTitle className="text-2xl">Editar Perfil</CardTitle>
+              <Cloud className="h-6 w-6" />
+              <CardTitle className="text-2xl">Perfil del Usuario</CardTitle>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white text-white hover:bg-sky-500"
+              onClick={handleEditClick}  // Llama a la función de redirección
+            >
+              Editar Perfil
+            </Button>
           </div>
           <CardDescription className="text-center">
-            Actualiza tu información personal
+            Información personal del usuario.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
-          {successMessage && (
-            <Alert className="max-w-2xl mx-auto mt-4 bg-green-100 border-green-400 text-green-700">
-              <AlertDescription>{successMessage}</AlertDescription>
-            </Alert>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div className="flex items-center space-x-2 text-sky-700">
+                <User className="h-4 w-4 text-sky-500" />
                 <span className="font-medium">Nombre:</span>
-                <Input 
-                  type="text"
-                  value={newUsername}
-                  onChange={(e) => setNewUsername(e.target.value)}
-                  placeholder="Nuevo nombre"
-                  className="w-full"
-                />
+                <span>{userData.username}</span>
               </div>
               <div className="flex items-center space-x-2 text-sky-700">
+                <Mail className="h-4 w-4 text-sky-500" />
                 <span className="font-medium">Email:</span>
-                <Input 
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="Nuevo correo electrónico"
-                  className="w-full"
-                />
+                <span>{userData.email}</span>
+              </div>
+              {/* Mostrar el campo role */}
+              <div className="flex items-center space-x-2 text-sky-700">
+                <span className="font-medium">Rol:</span>
+                <span>{userData.role}</span>
               </div>
             </div>
-            <Button 
-              type="submit" 
-              className="w-full bg-sky-500 hover:bg-sky-600"
-            >
-              Guardar Cambios
-            </Button>
-          </form>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
 };
 
-export default EditProfile;
+export default Profile;

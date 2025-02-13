@@ -1,3 +1,5 @@
+// services/ChabotServices.js
+
 export const sendMessage = async (message) => {
   try {
     const response = await fetch('http://localhost:5000/api/chatbot/message', {
@@ -9,13 +11,13 @@ export const sendMessage = async (message) => {
     });
 
     if (!response.ok) {
-      throw new Error('Error al enviar el mensaje');
+      throw new Error('Error al enviar el mensaje, asegurese de usar ¿? y en caso q especifique datos use sus respectivos signos °C y %');
     }
 
     const data = await response.json();
-    return data.message;
+    return data; // Debe contener { message, recommendations }
   } catch (error) {
     console.error('Error:', error);
-    return 'Hubo un error al procesar tu mensaje.';
+    throw new Error('Hubo un error al procesar tu mensaje.');
   }
 };

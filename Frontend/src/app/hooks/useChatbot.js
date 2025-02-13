@@ -40,9 +40,10 @@
 
 // export default useChatbot;
 
+// hooks/useChatbot.js
 
 import { useState } from 'react';
-import fetchGpt4Response from '../services/chatweather';
+import { sendMessage } from '../services/ChabotServices';
 
 const useChatbot = () => {
   const [messages, setMessages] = useState([]);
@@ -50,7 +51,7 @@ const useChatbot = () => {
   const [error, setError] = useState(null);
   const [lastRequestTime, setLastRequestTime] = useState(null); // Guardar el tiempo de la última solicitud
 
-  const sendMessage = async (query) => {
+  const handleSendMessage = async (query) => {
     // Evitar enviar solicitudes si ya estamos esperando una respuesta
     if (loading) return;
 
@@ -74,23 +75,27 @@ const useChatbot = () => {
       // Actualizar el tiempo de la última solicitud
       setLastRequestTime(now);
 
-      // Llamada a la API para obtener la respuesta del bot (GPT-4)
-      const response = await fetchGpt4Response(query);
+      // Llamada a la API para obtener la respuesta del bot
+      const response = await sendMessage(query);
 
-      // Agregar la respuesta del bot
+      // Agregar el mensaje principal
       setMessages((prevMessages) => [
         ...prevMessages,
-        { sender: 'bot', text: response },
+        { sender: 'bot', text: response.message },
+        // Agregar las recomendaciones como mensajes separados
+        ...response.recommendations.split('\n').filter(Boolean).map((recommendation) => ({
+          sender: 'bot',
+          text: recommendation,
+        })),
       ]);
     } catch (err) {
-      setError('Error al obtener respuesta de GPT-4: ' + err.message);
+      setError('Error al obtener respuesta del servidor: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  return { messages, loading, error, sendMessage };
+  return { messages, loading, error, handleSendMessage };
 };
 
 export default useChatbot;
-

@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 // Obtener todos los usuarios
 export const getUsers = (req, res) => {
-    db.all('SELECT id, username, email FROM usuarios', (err, rows) => {
+    db.all('SELECT id, username, email, role FROM usuarios', (err, rows) => {
         if (err) return res.status(500).json({ error: 'Error al obtener los usuarios' });
         res.json(rows);
     });
@@ -13,7 +13,7 @@ export const getUsers = (req, res) => {
 // Obtener un solo usuario por ID
 export const getUserById = (req, res) => {
     const { id } = req.params;
-    db.get('SELECT id, username, email FROM usuarios WHERE id = ?', [id], (err, row) => {
+    db.get('SELECT id, username, email, role FROM usuarios WHERE id = ?', [id], (err, row) => {
         if (err) return res.status(500).json({ error: 'Error al obtener el usuario' });
         if (!row) return res.status(404).json({ error: 'Usuario no encontrado' });
         res.json(row);
@@ -22,7 +22,7 @@ export const getUserById = (req, res) => {
 
 // Crear un nuevo usuario
 export const createUser = async (req, res) => {
-    const { username, email, password } = req.body;
+    const { username, email, password, role = 'user' } = req.body; // role con valor por defecto
     if (!username || !email || !password) {
         return res.status(400).json({ error: 'Todos los campos son requeridos' });
     }
@@ -30,11 +30,11 @@ export const createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     db.run(
-        'INSERT INTO usuarios (username, email, password) VALUES (?, ?, ?)',
-        [username, email, hashedPassword],
+        'INSERT INTO usuarios (username, email, password, role) VALUES (?, ?, ?, ?)', // Añadir el campo role
+        [username, email, hashedPassword, role],
         function (err) {
             if (err) return res.status(500).json({ error: 'Error al crear el usuario' });
-            res.status(201).json({ id: this.lastID, username, email });
+            res.status(201).json({ id: this.lastID, username, email, role });
         }
     );
 };
@@ -42,10 +42,10 @@ export const createUser = async (req, res) => {
 // Actualizar un usuario
 export const updateUser = async (req, res) => {
     const { id } = req.params;
-    const { username, email, password } = req.body;
+    const { username, email, password, role } = req.body;
 
     // Obtener los valores actuales del usuario
-    db.get(`SELECT * FROM usuarios WHERE id = ?`, [id], async (err, user) => {
+    db.get('SELECT * FROM usuarios WHERE id = ?', [id], async (err, user) => {
         if (err) return res.status(500).json({ error: 'Error al obtener el usuario' });
         if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
@@ -53,11 +53,12 @@ export const updateUser = async (req, res) => {
         const newUsername = username || user.username;
         const newEmail = email || user.email;
         const newPassword = password ? await bcrypt.hash(password, 10) : user.password;
+        const newRole = role || user.role;
 
         // Actualizar solo los campos modificados
         db.run(
-            `UPDATE usuarios SET username = ?, email = ?, password = ? WHERE id = ?`,
-            [newUsername, newEmail, newPassword, id],
+            'UPDATE usuarios SET username = ?, email = ?, password = ?, role = ? WHERE id = ?',
+            [newUsername, newEmail, newPassword, newRole, id],
             function (err) {
                 if (err) return res.status(500).json({ error: 'Error al actualizar el usuario' });
                 res.json({ message: 'Usuario actualizado correctamente' });
@@ -93,18 +94,12 @@ export const login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ error: 'Contraseña incorrecta' });
 
-        // Crear un token JWT
-        const token = jwt.sign({ id: user.id, username: user.username, email: user.email }, process.env.JWT_SECRET, {
-            expiresIn: '1h',  // El token expira en 1 hora
+        // Crear un token JWT con el rol incluido
+        const token = jwt.sign({ id: user.id, username: user.username, email: user.email, role: user.role }, process.env.JWT_SECRET, {
+            expiresIn: '1h',
         });
 
         res.json({ message: 'Login exitoso', token });
     });
 };
 
-// Función de logout
-export const logout = (req, res) => {
-    // Al usar JWT, no necesitamos hacer nada en el backend para el logout,
-    // solo eliminamos el token en el frontend.
-    res.json({ message: 'Logout exitoso' });
-};
